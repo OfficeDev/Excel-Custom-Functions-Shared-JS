@@ -4,12 +4,11 @@ const devCerts = require("office-addin-dev-certs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const CustomFunctionsMetadataPlugin = require("custom-functions-metadata-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const path = require("path");
 
 const urlDev = "https://localhost:3000/";
 const urlProd = "https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
 
-/* global require, module, process, __dirname */
+/* global require, module, process */
 
 async function getHttpsOptions() {
   const httpsOptions = await devCerts.getHttpsServerOptions();
