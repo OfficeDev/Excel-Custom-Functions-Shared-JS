@@ -17,6 +17,7 @@ const port: number = 4201;
 const testDataFile: string = `${process.cwd()}/test/end-to-end/src/test-data.json`;
 const testJsonData = JSON.parse(fs.readFileSync(testDataFile).toString());
 const testServer = new officeAddinTestServer.TestServer(port);
+const testResultsTimeout: number = 120000;
 let testValues: any = [];
 
 describe("Test Excel Custom Functions", function () {
@@ -43,9 +44,26 @@ describe("Test Excel Custom Functions", function () {
     });
     describe("Get test results for custom functions and validate results", function () {
       it("should get results from the taskpane application", async function () {
-        this.timeout(0);
+        this.timeout(testResultsTimeout + 10000);
+        let timeoutId: ReturnType<typeof setTimeout>;
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(
+            () => reject(new Error(`Timed out after ${testResultsTimeout / 1000}s waiting for test results.`)),
+            testResultsTimeout
+          );
+        });
+
+        try {
+          testValues = await Promise.race([testServer.getTestResults(), timeoutPromise]);
+        } finally {
+          clearTimeout(timeoutId);
+        }
+
+        const errorResult = testValues.find((value: any) => value.resultName === "test-error");
+        if (errorResult) {
+          assert.fail(`Taskpane reported error: ${errorResult.resultValue}`);
+        }
         // Expecting six result values + user agent
-        testValues = await testServer.getTestResults();
         console.log(`User Agent: ${testValues[0].Value}`);
         assert.strictEqual(testValues.length, 7);
       });
