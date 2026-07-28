@@ -45,9 +45,7 @@ async function runCfTests(): Promise<void> {
       }
     });
   } catch (err) {
-    testValues = [];
-    addErrorResult(testValues, `runCfTests failed: ${formatError(err)}`);
-    throw err;
+    throw new Error(`runCfTests failed: ${formatError(err)}`);
   }
 }
 
